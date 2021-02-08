@@ -6,15 +6,15 @@
 
     android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context=".imagepload.MainActivity">
+    tools:context="com.voterid.imagepload.MainActivity">
 
-<android.support.v7.widget.Toolbar
+<androidx.appcompat.widget.Toolbar
     android:id="@+id/mainTool"
     android:background="@color/colorPrimary"
     app:titleTextColor="@color/white"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-</android.support.v7.widget.Toolbar>
+</androidx.appcompat.widget.Toolbar>
 
     <FrameLayout
         android:id="@+id/mainContainer"

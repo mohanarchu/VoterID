@@ -5,14 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".imagepload.ImagesUpload"
+    tools:context="com.voterid.imagepload.ImagesUpload"
     tools:showIn="@layout/activity_images_upload">
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:orientation="horizontal"
         android:id="@+id/allImages"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </android.support.v7.widget.RecyclerView>
+    </androidx.recyclerview.widget.RecyclerView>
     <ScrollView
         android:visibility="gone"
         android:layout_width="match_parent"
@@ -42,12 +42,12 @@
                         android:text="ID"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
 
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                    </android.support.v7.widget.RecyclerView>
+                    </androidx.recyclerview.widget.RecyclerView>
 
 
                 </LinearLayout>
@@ -83,12 +83,12 @@
                             android:layout_height="wrap_content" />
                     </LinearLayout>
 
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/nameRecycle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                    </android.support.v7.widget.RecyclerView>
+                    </androidx.recyclerview.widget.RecyclerView>
 
 
 
@@ -112,14 +112,14 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:visibility="gone"
                     android:layout_weight="0.7"
                     android:orientation="vertical"
                     android:id="@+id/idsRecycle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent">
-                </android.support.v7.widget.RecyclerView>
+                </androidx.recyclerview.widget.RecyclerView>
 
 
             </LinearLayout>

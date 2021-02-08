@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".imagepload.login.otp.OtpVerification">
+    tools:context="com.voterid.imagepload.login.otp.OtpVerification">
 
     <LinearLayout
         android:orientation="vertical"
@@ -98,7 +98,7 @@
                 </LinearLayout>
 
 
-                <android.support.v7.widget.CardView
+                <androidx.cardview.widget.CardView
                     android:id="@+id/submitLogin"
                     android:layout_marginTop="50dp"
                     android:layout_gravity="center"
@@ -119,7 +119,7 @@
 
 
 
-                </android.support.v7.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
 
             </LinearLayout>
