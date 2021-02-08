@@ -372,170 +372,7 @@ public class ImagesUpload extends AppCompatActivity {
 
 
 
-    public class Adapters extends RecyclerView.Adapter<ViewHolder> implements ImgaeModel
-    {
-        ArrayList<Bitmap> chunkedImages;
 
-        ImagePresent imagePresent;
-        ProgressDialog progressDialog;
-        Context context;
-        ArrayList<com.video.aashi.voterid.imagepload.sesssion.MainArray> mainArrayArrayList;
-        public Adapters(Context context,ArrayList<Bitmap> chunkedImages,
-                        ArrayList<com.video.aashi.voterid.imagepload.sesssion.MainArray> mainArrayArrayList)        {
-
-            this.context = context;
-
-            this.chunkedImages = chunkedImages;
-            this.mainArrayArrayList = mainArrayArrayList;
-        }
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View        view   = LayoutInflater.from(getApplicationContext()).
-                    inflate(R.layout.imageview, viewGroup, false);
-            return new ViewHolder(view);
-        }
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
-            imagePresent = new ImagePresent(context,this);
-            viewHolder.image.setImageBitmap(scaleBitmaps(chunkedImages.get(i), 1000, 1000));
-            String aId="",aName="",aFather="",aGendre="",aAge ="",door="door",alldata="" ;
-            if (mainArrayArrayList.get(i).getVoterid() != null)
-            {
-
-                viewHolder.id.setText(mainArrayArrayList.get(i).getVoterid());
-            }
-            else
-            {
-
-                viewHolder.id.setText("Error finding..!");
-            }
-
-
-            if (mainArrayArrayList.get(i).getName() != null)
-            {
-
-                viewHolder.name.setText(mainArrayArrayList.get(i).getName() .replace("பெயர் ","").trim());
-            }
-            else
-            {
-
-                viewHolder.name.setText("Error finding..!");
-            }
-
-                if (mainArrayArrayList.get(i).getSex() != null)
-                {
-
-                    viewHolder.gendre.setText(mainArrayArrayList.get(i).getSex().replace("பாலினம் ","").trim());
-                }
-                else
-                {
-
-                    viewHolder.gendre.setText("Cant find data..!");
-                }
-                if (mainArrayArrayList.get(i).getAge() != null)
-                {
-
-                    viewHolder.age.setText(mainArrayArrayList.get(i).getSex() .replace("வயது ","").trim());
-                }
-                else
-                {
-
-                    viewHolder.age.setText("Cant find data..!");
-                }
-
-           if (mainArrayArrayList.get(i).getFathername()!= null)
-           {
-               if ( mainArrayArrayList.get(i).getFathername() .contains("தந்தை பெயர்") )
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("தந்தை பெயர் ","").trim());
-                   viewHolder.nameTexts.setText("தந்தை பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("தாய் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("தாய் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("தாய் பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("கணவர் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("கணவர் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("கணவர் பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("இதார் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("இதார் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("இதார் பெயர்");
-               }
-               else
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("பெயர்","").trim());
-                   viewHolder.nameTexts.setText("Father/Husband name");
-               }
-
-           }
-           else
-           {
-               aFather  = "Error finding";
-           }
-           String alldatass ="";
-           if (mainArrayArrayList.get(i).getAlldata()!= null)
-           {
-               alldatass = alldatas.get(i);
-           }
-           else
-           {
-               alldatass ="Error finding";
-           }
-
-
-               Log.d(TAG, "Main Arrays"+ mainArrayss.size());
-
-               //    progressDialog.dismiss();
-                 //  Toast.makeText(context, "Upload finished..!", Toast.LENGTH_SHORT).show();
-                   counters = 0;
-
-
-        }
-        @Override
-        public int getItemCount() {
-            return chunkedImages.size();
-        }
-        @Override
-        public void showProgress() {
-            progressDialog = new ProgressDialog(ImagesUpload.this);
-            progressDialog.show();
-        }
-        @Override
-        public void hideProgress() {
-        //  progressDialog.dismiss();
-        }
-        @Override
-        public void progressMessage(String message) {
-          //   progressDialog.setMessage(message);
-        }
-        @Override
-        public void showToast(String message ) {
-          //  Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        }
-        @Override
-        public void removePos(int pos) {
-//            if (counters++ < 8)
-//            handler.postDelayed(runnable, 4000);
-            Log.i("TAG","Counters"+counters);
-//            names.remove(pos);
-//            fathername.remove(pos);
-//            ids.remove(pos);
-//            chunkedImages.remove(pos);
-//            notifyItemRemoved(pos);
-          //  notifyDataSetChanged();
-        }
-    }
     private File persistImage(Bitmap bitmap, String name) {
         File filesDir = getApplication().getFilesDir();
         File imageFile = new File(filesDir, name + ".jpg");
@@ -551,22 +388,7 @@ public class ImagesUpload extends AppCompatActivity {
         }
         return imageFile;
     }
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        TextView id,name,fathername,age,gendre,nameTexts;
-        CardView upload;
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            upload = (CardView)itemView. findViewById(R.id.upload);
-            nameTexts =(TextView)itemView.findViewById(R.id.nameTexts);
-            id =(TextView)itemView.findViewById(R.id.userId);
-            name =(TextView)itemView.findViewById(R.id.names);
-            fathername =(TextView)itemView.findViewById(R.id.username);
-            image =(ImageView) itemView.findViewById(R.id.mailImages);
-            age =(TextView)itemView.findViewById(R.id.age);
-            gendre =(TextView)itemView.findViewById(R.id.gendre);
-        }
-    }
+
     public void startCamera() {
         if (PermissionUtils.requestPermission(
                 this,
@@ -796,12 +618,12 @@ public class ImagesUpload extends AppCompatActivity {
                  Log.i("TAG", "MyarraySize" + alldatas.size() );
                 if (alldatas.size()==9)
                 {
-                    adapters = new Adapters(getApplicationContext(),chunkedImages,mainArrayss);
+                    adapters = new Adapters();
+                    adapters.setList(chunkedImages,mainArrayss);
+                    adapters.notifyDataSetChanged();
                     imageRecycle.setAdapter(adapters);
                     progressDialog.dismiss();
                 }
-
-                // labelDetectionTask.cancel(true);
             }
         }
     }
