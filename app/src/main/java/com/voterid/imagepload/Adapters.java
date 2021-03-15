@@ -23,10 +23,7 @@ import static com.voterid.imagepload.ImagesUpload.scaleBitmaps;
 public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
     {
 
-
-        ImagePresent imagePresent;
-        ProgressDialog progressDialog;
-        Context context;
+        OnItemReadInterface onItemReadInterface;
         ArrayList<Bitmap> chunkedImages;
         ArrayList<MainArray> mainArrayArrayList;
         void setList( ArrayList<Bitmap> chunkedImages, ArrayList<com.voterid.imagepload.sesssion.MainArray> mainArrayArrayList){
@@ -44,6 +41,13 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
         @Override
         public void onBindViewHolder(@NonNull Adapters.ViewHolder viewHolder, @SuppressLint("RecyclerView") int i) {
 
+
+            viewHolder.read.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemReadInterface.selectedImage(i,chunkedImages.get(i));
+                }
+            });
             viewHolder.upload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -52,12 +56,10 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
                      notifyItemChanged(i);
                 }
             });
-
             viewHolder.image.setImageBitmap(scaleBitmaps(chunkedImages.get(i), 1000, 1000));
             String aId="",aName="",aFather="",aGendre="",aAge ="",door="door",alldata="" ;
             if (mainArrayArrayList.get(i).getVoterid() != null)
             {
-
                 viewHolder.id.setText(mainArrayArrayList.get(i).getVoterid());
             }
             else
@@ -95,7 +97,6 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
                 }
                 else
                 {
-
                     viewHolder.age.setText("Cant find data..!");
                 }
 
@@ -127,7 +128,6 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
                }
                else
                {
-
                    viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("பெயர்","").trim());
                    viewHolder.nameTexts.setText("Father/Husband name");
                }
@@ -147,13 +147,19 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
         public int getItemCount() {
             return chunkedImages.size();
         }
+
+
+
+
+
         class ViewHolder extends RecyclerView.ViewHolder {
             ImageView image;
-            TextView id,name,fathername,age,gendre,nameTexts;
+            TextView id,name,fathername,age,gendre,nameTexts,read;
             CardView upload;
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 upload = (CardView)itemView. findViewById(R.id.upload);
+                read = itemView.findViewById(R.id.read);
                 nameTexts =(TextView)itemView.findViewById(R.id.nameTexts);
                 id =(TextView)itemView.findViewById(R.id.userId);
                 name =(TextView)itemView.findViewById(R.id.names);
@@ -162,6 +168,19 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
                 age =(TextView)itemView.findViewById(R.id.age);
                 gendre =(TextView)itemView.findViewById(R.id.gendre);
             }
+        }
+
+        public void setItem(MainArray mainArray,int postion) {
+            mainArrayArrayList.set(postion,mainArray);
+            notifyItemChanged(postion);
+        }
+
+        public void setInterface(OnItemReadInterface onItemReadInterface) {
+            this.onItemReadInterface  = onItemReadInterface;
+        }
+
+        interface  OnItemReadInterface {
+            void selectedImage(int position,Bitmap bitmap);
         }
 
 }

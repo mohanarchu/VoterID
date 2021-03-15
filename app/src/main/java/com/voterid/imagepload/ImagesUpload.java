@@ -111,6 +111,7 @@ public class ImagesUpload extends AppCompatActivity {
     Sessions sessions;
     ProgressDialog progressDialog;
     ArrayList<Bitmap> chunkedImages;
+    ArrayList<Bitmap> newChunkImage;
     ArrayList<MainArray> mainArrays;
     FloatingActionButton upload;
     Runnable runnable;
@@ -475,10 +476,39 @@ public class ImagesUpload extends AppCompatActivity {
                 .start(this);
     }
 
+    private void splitImageSingle(Bitmap image,int position) {
+        int rows,cols;
+        int chunkHeight,chunkWidth;
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), true);
+        rows =  6;
+        cols = 1;
+        chunkHeight = scaledBitmap.getHeight()/rows;
+        chunkWidth = scaledBitmap.getWidth()/cols;
+        Bitmap newBitmap;
+        newChunkImage = new ArrayList<>();
+        //xCoord and yCoord are the pixel positions of the image chunks
+        int yCoord = 0;
+        for(int x=0; x<rows; x++){
+            int xCoord = 0;
+            for(int y=0; y<cols; y++){
+                newChunkImage.add(Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight));
+                newBitmap = Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight);
+                xCoord += chunkWidth;
+            }
+            yCoord += chunkHeight;
+        }
+        BitmapFactory.Options optionss = new BitmapFactory.Options();
+        optionss.inScaled = false;
+        for (int i=0 ; i<newChunkImage.size(); i++)  {
+           callCloudVision(scaleBitmaps(newChunkImage.get(i) ,500,100), position);
+        }
+    }
+
+
     private void splitImage(Bitmap image, int chunkNumbers)
     {
 
-        progressDialog.show();
+//        progressDialog.show();
         int rows,cols;
         int chunkHeight,chunkWidth;
         //To store all the small image chunks in bitmap format in this list
@@ -495,25 +525,25 @@ public class ImagesUpload extends AppCompatActivity {
             int xCoord = 0;
             for(int y=0; y<cols; y++){
                 chunkedImages.add(Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight));
-                bitmaps = new Bitmap[chunkedImages.size()];
+                mainArrayss.add(new com.voterid.imagepload.sesssion.MainArray("","",
+                        "","","","139",""));
                 xCoord += chunkWidth;
             }
             yCoord += chunkHeight;
         }
         BitmapFactory.Options optionss = new BitmapFactory.Options();
         optionss.inScaled = false;
-        for (int i=0 ; i<chunkedImages.size(); i++)
-        {
 
-             progressDialog.setMessage("Images are Processing..!" );
-             callCloudVision(scaleBitmaps(chunkedImages.get(i) ,500,500) );
-        }
-
-      //  adapters = new Adapters(getApplicationContext(),chunkedImages,mainArrayss);
-      //  imageRecycle.setAdapter(adapters);
-       ///  progressDialog.setMessage( "30(2) " + "is Processing..!" );
-    //   callCloudVision(scaleBitmaps(chunkedImages.get(2) ,500,500) );
-       callCloudVision(scaleBitmaps(chunkedImages.get(8) ,500,500) );
+        adapters = new Adapters();
+        adapters.setList(chunkedImages,mainArrayss);
+        adapters.setInterface(new Adapters.OnItemReadInterface() {
+            @Override
+            public void selectedImage(int position, Bitmap bitmap) {
+                splitImageSingle(bitmap,position);
+            }
+        });
+        adapters.notifyDataSetChanged();
+        imageRecycle.setAdapter(adapters);
     }
     public static Bitmap scaleBitmaps(Bitmap bitmap, int newWidth, int newHeight) {
         Bitmap scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
@@ -585,9 +615,12 @@ public class ImagesUpload extends AppCompatActivity {
     private  class LableDetectionTask extends AsyncTask<Object, Void, String> {
         private final WeakReference<ImagesUpload> mActivityWeakReference;
         private Vision.Images.Annotate mRequest;
-        LableDetectionTask(ImagesUpload activity, Vision.Images.Annotate annotate) {
+        int postion;
+        int readedItem= 0;
+        LableDetectionTask(ImagesUpload activity, Vision.Images.Annotate annotate,int postion) {
             mActivityWeakReference = new WeakReference<>(activity);
             mRequest = annotate;
+            this.postion = postion;
         }
         @Override
         protected String doInBackground(Object... params)
@@ -607,27 +640,37 @@ public class ImagesUpload extends AppCompatActivity {
         protected void onPostExecute(String result) {
             ImagesUpload activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
-             //   getNames(result);
-                mainArrayss.add(new com.voterid.imagepload.sesssion.MainArray(getIds(result),getNames(result),
-                        getNamess(result),getAge(result), getSex(result),"139",result));
-                 alldatas.add(result);
-                 Log.i("TAG", "MyarraySize" + alldatas.size() );
-                if (alldatas.size()==9)
-                {
-                    adapters = new Adapters();
-                    adapters.setList(chunkedImages,mainArrayss);
-                    adapters.notifyDataSetChanged();
-                    imageRecycle.setAdapter(adapters);
-                    progressDialog.dismiss();
+                Log.i("TAG", "arraySize New " +result);
+
+                String voterid = "",name = "",fatherName = "",houseNo = "",age = "",gendre = "";
+                if (readedItem == 0) {
+                    voterid = result;
+                } else if (readedItem ==  1) {
+                    name = result;
+                } else if (readedItem == 2) {
+                    fatherName = result;
+                } else if (readedItem == 3) {
+                    houseNo = result;
+                } else if (readedItem == 4) {
+                    age = result;
                 }
+
+                if (readedItem == 5) {
+                    gendre = result;
+                    adapters.setItem(new com.voterid.imagepload.sesssion.MainArray(voterid,name,
+                            fatherName,age,gendre,houseNo,gendre),postion);
+                    readedItem = 0;
+                }
+                readedItem = readedItem + 1;
+
             }
+
         }
     }
    String getNames(String result)
     {
         String names="";
         String results = result.replaceAll("[-+.^:,)(]","");
-
         results.substring(results.indexOf("\n") + 1).trim();
         String[] lines = results.split("\\n");
     //    names = lines[1].replace("பெயர் ","");
@@ -679,9 +722,7 @@ public class ImagesUpload extends AppCompatActivity {
 
         return  names;
     }
-
-    String getAge(String result)
-    {
+    String getAge(String result) {
         String names="";
         String results = result.replaceAll("[-+.^:,)(]","");
         String finalss =results.replaceAll("\\s","");
@@ -695,19 +736,12 @@ public class ImagesUpload extends AppCompatActivity {
                  names = mss.group();
                 Log.i("Find","arraySize" +mss.group());
             }
-            else
-            {
-                names = "";
-
-            }
-
+            else { names = ""; }
         }
-
         return  names;
 
     }
-    String getSex(String result)
-    {
+    String getSex(String result) {
         String names="";
         String results = result.replaceAll("[-+.^:,)(]","");
         String finalss =results.replaceAll("\\s","");
@@ -732,51 +766,22 @@ public class ImagesUpload extends AppCompatActivity {
     }
 
 
-    String getIds(String result)
-    {
+    String getIds(String result) {
         Pattern  ps=Pattern.compile("[A-Z](.*?)[0-9]{7}");
         Pattern  p=Pattern.compile("[A-Z](.*?)[0-9]{6}");
          String results = "";
-     //   Matcher m = p.matcher(finals);
-    //     Matcher ms = ps.matcher(finals);
         String[] lines = result.split("\\n");
         results = lines[0].trim();
-        Log.i("TAG", "arraySize" +results);
-//        while (ms.find() )
-//        {
-//            if (!ms.group().isEmpty()  )
-//            {
-//
-//                Log.i("TAG", "arraySizes" + ms.group());
-//                results = ms.group();
-//            }
-//            else
-//            {
-//                while (m.find())
-//                {
-//                    Log.i("TAG", "arraySize" + finals);
-//                    if (!m.group().isEmpty()  )
-//                    {
-//                        Log.i("TAG", "arraySize" + m.group());
-//                        results = m.group();
-//                    }
-//                    else
-//                    {
-//                        Log.i("TAG", "arraySize" +finals);
-//                        results = "Validation Error";
-//                    }
-//                }
-//            }
-//        }
+
         return  results;
     }
-    private void callCloudVision(final Bitmap bitmap) {
+    private void callCloudVision(final Bitmap bitmap,int position) {
 
         mImageDetails.setText(R.string.loading_message);
         // Do the real work in an async task, because we need to use the network anyway
         try {
             labelDetectionTask = new
-                    LableDetectionTask(this, prepareAnnotationRequest(bitmap));
+                    LableDetectionTask(this, prepareAnnotationRequest(bitmap),position);
             labelDetectionTask.execute();
         } catch (IOException e) {
             Log.d(TAG, "failed to make API request because of other IOException " +

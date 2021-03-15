@@ -22,6 +22,32 @@
                 android:scaleType="fitXY"
                 android:layout_width="match_parent"
                 android:layout_height="160sp" />
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_marginRight="10sp"
+                app:cardCornerRadius="6sp"
+                android:layout_marginLeft="10sp"
+                app:cardBackgroundColor="@color/colorPrimary"
+                android:layout_marginTop="10sp"
+                android:layout_width="match_parent"
+                android:layout_height="45sp">
+
+
+                <TextView
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:id="@+id/read"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="Read data"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                </TextView>
+
+            </androidx.cardview.widget.CardView>
+
             <RelativeLayout
                 android:layout_marginTop="10sp"
                 android:layout_width="match_parent"
