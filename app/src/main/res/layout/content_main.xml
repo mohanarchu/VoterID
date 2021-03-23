@@ -9,11 +9,14 @@
     tools:showIn="@layout/activity_images_upload">
     <androidx.recyclerview.widget.RecyclerView
         android:orientation="horizontal"
+
         android:id="@+id/allImages"
+        android:layout_marginBottom="60dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </androidx.recyclerview.widget.RecyclerView>
     <ScrollView
+        android:id="@+id/scrool"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

@@ -14,19 +14,29 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.voterid.aashi.voterid.R;
+import com.voterid.aashi.voterid.databinding.ImageviewBinding;
+import com.voterid.imagepload.activity.BoothSelectionActivity;
+import com.voterid.imagepload.pojo.BoothsPojo;
+import com.voterid.imagepload.pojo.SearchArray;
+import com.voterid.imagepload.pojo.UserPojo;
 import com.voterid.imagepload.sesssion.MainArray;
+import com.voterid.imagepload.view.CommonSelectorListener;
+import com.voterid.imagepload.view.DropDownSelector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static com.voterid.imagepload.ImagesUpload.scaleBitmaps;
 
-public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
-    {
+
+public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder> implements CommonSelectorListener {
 
         OnItemReadInterface onItemReadInterface;
         ArrayList<Bitmap> chunkedImages;
-        ArrayList<MainArray> mainArrayArrayList;
-        void setList( ArrayList<Bitmap> chunkedImages, ArrayList<com.voterid.imagepload.sesssion.MainArray> mainArrayArrayList){
+        int selectedPosition;
+        int selected = 0;
+        ArrayList<UserPojo.Result> mainArrayArrayList;
+        void setList( ArrayList<Bitmap> chunkedImages, ArrayList<UserPojo.Result> mainArrayArrayList){
             this.mainArrayArrayList = mainArrayArrayList;
             this.chunkedImages = chunkedImages;
         }
@@ -34,111 +44,35 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
         @NonNull
         @Override
         public Adapters.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View        view   = LayoutInflater.from(viewGroup.getContext()).
-                    inflate(R.layout.imageview, viewGroup, false);
-            return new Adapters.ViewHolder(view);
+            ImageviewBinding imageviewBinding =ImageviewBinding.inflate( LayoutInflater.from(viewGroup.getContext()));
+            return new Adapters.ViewHolder(imageviewBinding);
         }
         @Override
         public void onBindViewHolder(@NonNull Adapters.ViewHolder viewHolder, @SuppressLint("RecyclerView") int i) {
 
 
-            viewHolder.read.setOnClickListener(new View.OnClickListener() {
+            viewHolder.imageviewBinding.read.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     onItemReadInterface.selectedImage(i,chunkedImages.get(i));
                 }
             });
-            viewHolder.upload.setOnClickListener(new View.OnClickListener() {
+
+            viewHolder.imageviewBinding.upload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mainArrayArrayList.remove(i);
-                    chunkedImages.remove(i); 
-                     notifyItemChanged(i);
+                    onItemReadInterface.uploadData(mainArrayArrayList.get(i),i);
                 }
             });
-            viewHolder.image.setImageBitmap(scaleBitmaps(chunkedImages.get(i), 1000, 1000));
-            String aId="",aName="",aFather="",aGendre="",aAge ="",door="door",alldata="" ;
-            if (mainArrayArrayList.get(i).getVoterid() != null)
-            {
-                viewHolder.id.setText(mainArrayArrayList.get(i).getVoterid());
-            }
-            else
-            {
-
-                viewHolder.id.setText("Error finding..!");
-            }
-
-
-            if (mainArrayArrayList.get(i).getName() != null)
-            {
-
-                viewHolder.name.setText(mainArrayArrayList.get(i).getName() .replace("பெயர் ","").trim());
-            }
-            else
-            {
-
-                viewHolder.name.setText("Error finding..!");
-            }
-
-                if (mainArrayArrayList.get(i).getSex() != null)
-                {
-
-                    viewHolder.gendre.setText(mainArrayArrayList.get(i).getSex().replace("பாலினம் ","").trim());
-                }
-                else
-                {
-
-                    viewHolder.gendre.setText("Cant find data..!");
-                }
-                if (mainArrayArrayList.get(i).getAge() != null)
-                {
-
-                    viewHolder.age.setText(mainArrayArrayList.get(i).getSex() .replace("வயது ","").trim());
-                }
-                else
-                {
-                    viewHolder.age.setText("Cant find data..!");
-                }
-
-           if (mainArrayArrayList.get(i).getFathername()!= null)
-           {
-               if ( mainArrayArrayList.get(i).getFathername() .contains("தந்தை பெயர்") )
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("தந்தை பெயர் ","").trim());
-                   viewHolder.nameTexts.setText("தந்தை பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("தாய் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("தாய் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("தாய் பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("கணவர் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("கணவர் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("கணவர் பெயர்");
-               }
-               else if (mainArrayArrayList.get(i).getFathername().contains("இதார் பெயர்"))
-               {
-
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("இதார் பெயர்","").trim());
-                   viewHolder.nameTexts.setText("இதார் பெயர்");
-               }
-               else
-               {
-                   viewHolder.fathername.setText(mainArrayArrayList.get(i).getFathername().replace("பெயர்","").trim());
-                   viewHolder.nameTexts.setText("Father/Husband name");
-               }
-
-           }
-           else
-           {
-               aFather  = "Error finding";
-           }
-           String alldatass ="";
-
+            viewHolder.imageviewBinding.mailImages.setImageBitmap(scaleBitmaps(chunkedImages.get(i), 1000, 1000));
+            viewHolder.imageviewBinding.userId.setText(getNull(mainArrayArrayList.get(i).getEpicId()));
+            viewHolder.imageviewBinding.names.setText( getNull(mainArrayArrayList.get(i).getFm_name_english())+"/"+ getNull(mainArrayArrayList.get(i).getFm_name_tamil()));
+            viewHolder.imageviewBinding.fatherName.setText(getNull(mainArrayArrayList.get(i).getRelation_firstname_english())+"/"+getNull(mainArrayArrayList.get(i).getRelation_firstname_tamil()));
+            viewHolder.imageviewBinding.age.setText(getNull(mainArrayArrayList.get(i).getAge()));
+            viewHolder.imageviewBinding.gendre.setText(getNull(mainArrayArrayList.get(i).getGendre()));
+            viewHolder.imageviewBinding.gaurdianType.setText(getNull(mainArrayArrayList.get(i).getRelation_type()));
+            viewHolder.imageviewBinding.partyAff.setText(getNull(mainArrayArrayList.get(i).getParty_affiliation()));
+            viewHolder.imageviewBinding.canvasType.setText(getNull(mainArrayArrayList.get(i).getCanvass_type()));
 
 
 
@@ -148,30 +82,62 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
             return chunkedImages.size();
         }
 
-
-
-
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            ImageView image;
-            TextView id,name,fathername,age,gendre,nameTexts,read;
-            CardView upload;
-            public ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                upload = (CardView)itemView. findViewById(R.id.upload);
-                read = itemView.findViewById(R.id.read);
-                nameTexts =(TextView)itemView.findViewById(R.id.nameTexts);
-                id =(TextView)itemView.findViewById(R.id.userId);
-                name =(TextView)itemView.findViewById(R.id.names);
-                fathername =(TextView)itemView.findViewById(R.id.username);
-                image =(ImageView) itemView.findViewById(R.id.mailImages);
-                age =(TextView)itemView.findViewById(R.id.age);
-                gendre =(TextView)itemView.findViewById(R.id.gendre);
+        @Override
+        public void selectedId(int position, String name, String selectedId, String alternateId) {
+            if (selected ==  0) {
+                mainArrayArrayList.get(selectedPosition).setCanvass_type(name);
+                notifyItemChanged(selectedPosition);
+            } else if (selected == 1) {
+                mainArrayArrayList.get(selectedPosition).setParty_affiliation(name);
+                notifyItemChanged(selectedPosition);
             }
         }
 
-        public void setItem(MainArray mainArray,int postion) {
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            ImageviewBinding imageviewBinding;
+            public ViewHolder(@NonNull  ImageviewBinding imageviewBinding) {
+                super(imageviewBinding.getRoot());
+                this.imageviewBinding = imageviewBinding;
+                imageviewBinding.canvasType.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ArrayList<SearchArray> searchArrays = new ArrayList<>();
+                        searchArrays.add(new SearchArray("Phone call","",""));
+                        searchArrays.add(new SearchArray("Direct Visit","",""));
+                        searchArrays.add(new SearchArray("Other","",""));
+                        DropDownSelector dropDownSelector = new
+                                DropDownSelector(itemView.getContext(),  imageviewBinding.canvasType,
+                                searchArrays, Adapters.this, 2);
+                        dropDownSelector.show(imageviewBinding.canvasType);
+                        selected = 0;
+                        selectedPosition = getAdapterPosition();
+                    }
+                });
+                imageviewBinding.partyAff.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ArrayList<SearchArray> searchArrays = new ArrayList<>();
+                        searchArrays.add(new SearchArray("Official/அதிகாரி","",""));
+                        searchArrays.add(new SearchArray("Member/உறுப்பினர்","",""));
+                        searchArrays.add(new SearchArray("leaning/அனுதாபி","",""));
+                        searchArrays.add(new SearchArray("Others/மற்றவை","",""));
+                        DropDownSelector dropDownSelector = new DropDownSelector(itemView.getContext(),  imageviewBinding.partyAff, searchArrays, Adapters.this, 2);
+                        dropDownSelector.show(imageviewBinding.partyAff);
+                        selected = 1;
+                        selectedPosition = getAdapterPosition();
+                    }
+                });
+            }
+        }
+
+        public void setItem(UserPojo.Result mainArray,int postion) {
             mainArrayArrayList.set(postion,mainArray);
+            notifyItemChanged(postion);
+        }
+
+        public void removeItem(int postion) {
+            mainArrayArrayList.remove(postion);
             notifyItemChanged(postion);
         }
 
@@ -181,6 +147,11 @@ public class Adapters extends RecyclerView.Adapter<Adapters.ViewHolder>
 
         interface  OnItemReadInterface {
             void selectedImage(int position,Bitmap bitmap);
+            void uploadData(UserPojo.Result result,int position);
+        }
+
+        String getNull(String value) {
+          return value == null ? "- " : value;
         }
 
 }

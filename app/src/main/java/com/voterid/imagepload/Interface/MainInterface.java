@@ -5,6 +5,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.voterid.imagepload.login.LoginPojo;
 import com.voterid.imagepload.login.otp.OtpPojo;
+import com.voterid.imagepload.pojo.AreaPojo;
+import com.voterid.imagepload.pojo.AssemblyPojo;
+import com.voterid.imagepload.pojo.BoothsPojo;
+import com.voterid.imagepload.pojo.UpdatePojo;
+import com.voterid.imagepload.pojo.UserPojo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +33,12 @@ public interface MainInterface {
     @Headers({ "Content-Type: application/json;charset=UTF-8"})
     Observable<OtpPojo> getBooths(@Body JsonObject jsonObject);
 
-    @Multipart
-    @POST("CitizenRegister/AppCitizenRegisterCreate")
-    Observable<ResponseBody> CitizenRegister(@PartMap HashMap<String, JsonArray> listHashMap,
-                                             @Part List<MultipartBody.Part> files);
+//    @Multipart
+//    @POST("uploadFile")
+//    Observable<ResponseBody> CitizenRegister(@Part MultipartBody.Part files);
+
+    @POST("update")
+    Observable<UpdatePojo> citizenRegister(@Body JsonObject jsonObject);
 
     @POST("Campaign/AppCampaignManagerDetail")
     @Headers({ "Content-Type: application/json;charset=UTF-8"})
@@ -40,5 +47,21 @@ public interface MainInterface {
     @POST("CitizenRegister/AppCitizenRegisterList")
     @Headers({ "Content-Type: application/json;charset=UTF-8"})
     Observable<OtpPojo> CityZenList(@Body JsonObject jsonObject);
+
+    @POST("getDetails")
+    @Headers({ "Content-Type: application/json;charset=UTF-8"})
+    Observable<AssemblyPojo> getAssemnly(@Body JsonObject jsonObject);
+
+    @POST("getDetails")
+    @Headers({ "Content-Type: application/json;charset=UTF-8"})
+    Observable<BoothsPojo> getAsBooths(@Body JsonObject jsonObject);
+
+    @POST("getDetails")
+    @Headers({ "Content-Type: application/json;charset=UTF-8"})
+    Observable<AreaPojo> getArea(@Body JsonObject jsonObject);
+
+    @POST("getDetails")
+    @Headers({ "Content-Type: application/json;charset=UTF-8"})
+    Observable<UserPojo> getUser(@Body JsonObject jsonObject);
 
 }

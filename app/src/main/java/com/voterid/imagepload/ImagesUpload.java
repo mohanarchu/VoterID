@@ -21,8 +21,11 @@ import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.SnapHelper;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +35,7 @@ import android.widget.Toast;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.Json;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.vision.v1.Vision;
 import com.google.api.services.vision.v1.VisionRequest;
@@ -49,6 +53,8 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import com.voterid.aashi.voterid.R;
 import com.voterid.imagepload.Interface.MainInterface;
 import com.voterid.imagepload.Interface.NetworkClient;
+import com.voterid.imagepload.activity.presenter.UserPresenter;
+import com.voterid.imagepload.pojo.UserPojo;
 import com.voterid.imagepload.sesssion.Sessions;
 
 import org.json.JSONException;
@@ -79,7 +85,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 
-public class ImagesUpload extends AppCompatActivity {
+public class ImagesUpload extends AppCompatActivity implements UserPresenter.UserView {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCZZNBatP1OgUCyR1TEb0NUHjABl3ZhrFk";
     public  static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -96,7 +102,6 @@ public class ImagesUpload extends AppCompatActivity {
     Button raed,names;
     static RecyclerView recyclerView,recyclerView1;
     static RecyclerView imageRecycle;
-    static ArrayList<Names> arrayList;
     int counter=0;
     Adapters adapters;
     ArrayList<String> memberIds;
@@ -114,24 +119,24 @@ public class ImagesUpload extends AppCompatActivity {
     ArrayList<Bitmap> newChunkImage;
     ArrayList<MainArray> mainArrays;
     FloatingActionButton upload;
-    Runnable runnable;
     ArrayList<File> filearrays;
-    int counters=0;
     JsonObject jsonObject;
-    JsonArray jsonArray;
-    ArrayList<com.voterid.imagepload.sesssion.MainArray> mainArrayss;
+    ArrayList<UserPojo.Result> mainArrayss;
     static AsyncTask<Object, Void, String> labelDetectionTask;
+    int adapterPosoition;
+    UserPresenter userPresenter;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_images_upload);
+        userPresenter = new UserPresenter(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         progressDialog = new ProgressDialog(ImagesUpload.this);
         Intent intent =getIntent();
         if (intent != null)
         {
-            boothid = intent.getStringExtra("boothid");
+            boothid = intent.getStringExtra("boothId");
         }
         mainArrays = new ArrayList<>();
         sessions = new Sessions(getApplicationContext());
@@ -150,13 +155,6 @@ public class ImagesUpload extends AppCompatActivity {
         mainArrayss = new ArrayList<>();
         filearrays = new ArrayList<>();
         imageRecycle =(RecyclerView)findViewById(R.id.allImages);
-//        recyclerView = (RecyclerView)findViewById(R.id.idsRecycle);
-//        arrayList = new ArrayList<>();
-//        final LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-//        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-//        recyclerView.setLayoutManager(layoutManager);
-//      //
-//       recyclerView.setAdapter(new IdAdapter(ImagesUpload.this, arrayList));
         final LinearLayoutManager layoutManagerss = new LinearLayoutManager(getApplicationContext());
         layoutManagerss.setOrientation(LinearLayoutManager.HORIZONTAL);
         imageRecycle.setLayoutManager(layoutManagerss);
@@ -193,85 +191,50 @@ public class ImagesUpload extends AppCompatActivity {
                 {
                     myList.add(arrayList.get(i));
                 }
-
             }
         });
-        upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RequestBody requestBody;
-                JsonArray jsonArray = new JsonArray();
-                RequestBody booth,voter,candidate,father,age,sex,door,userid,alldata;
-                HashMap<String,RequestBody> mp = new  HashMap<>();
-                HashMap<String,RequestBody> maps = new  HashMap<>();
-                List< JsonObject> list = new ArrayList<>();
-               for (int i=0;i<mainArrayss.size();i++) {
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("Booth_Id","5c94ea6ad8edb13578370e11");
-                    jsonObject.addProperty("VoterIdNumber",mainArrayss.get(i).getVoterid());
-                    jsonObject.addProperty("CandidateName",mainArrayss.get(i).getName());
-                    jsonObject.addProperty("FatherName",mainArrayss.get(i).getFathername());
-                    jsonObject.addProperty("CandidateAge",mainArrayss.get(i).getAge());
-                    jsonObject.addProperty("CandidateSex",mainArrayss.get(i).getSex());
-                    jsonObject.addProperty("DoorNumber",mainArrayss.get(i).getDooenumber());
-                    jsonObject.addProperty("User_Id",sessions.getId());
-                    jsonObject.addProperty("ALL_DATA",mainArrayss.get(i).getAlldata());
-//////                    jsonArray.add(jsonObject);
-//                   booth=RequestBody.create(MediaType.parse("multipart/form-data"),"5c94ea6ad8edb13578370e11"  );
-//                   voter =RequestBody.create(MediaType.parse("multipart/form-data"),"id");
-//                   candidate =RequestBody.create(MediaType.parse("multipart/form-data"),"name");
-//                   father =RequestBody.create(MediaType.parse("multipart/form-data"),"father");
-//                   age =RequestBody.create(MediaType.parse("multipart/form-data"),"age");
-//                   sex =RequestBody.create(MediaType.parse("multipart/form-data"),"sex");
-//                   door =RequestBody.create(MediaType.parse("multipart/form-data"),"door");
-//                   userid =RequestBody.create(MediaType.parse("multipart/form-data"),sessions.getId());
-//                   alldata =RequestBody.create(MediaType.parse("multipart/form-data"),"data");
-//                   mp.put("Booth_Id", booth);
-//                   mp.put("VoterIdNumber",voter);
-//                   mp.put("CandidateName",candidate);
-//                   mp.put("FatherName",father);
-//                   mp.put("CandidateAge",age);
-//                   mp.put("CandidateSex",sex);
-//                   mp.put("DoorNumber",door);
-//                   mp.put("User_Id",userid);
-//                   mp.put("ALL_DATA",alldata);
-                   //list.add(jsonObject);
-                   jsonArray.add(jsonObject);
-               }
-               HashMap<String, JsonArray> listHashMap = new HashMap<>();
-                listHashMap.put("Info",jsonArray);
-               //  Log.i("TAG" ,"Uploaded strings"+ jsonArray.size()+ jsonArray);
-                MultipartBody.Part body = null;
-                HashMap<String, List<MultipartBody.Part>> listHashMaps = new HashMap<>();
-                final int random = new Random().nextInt(61) + 20;
-                        HashMap<String,MultipartBody.Part> map=new HashMap<>(filearrays.size());
-                RequestBody file=null;
-                List<MultipartBody.Part> images = new ArrayList<>();
-                File f=null;
-                for(int i=0,size=chunkedImages.size(); i<size;i++){
-
-                    RequestBody requestImageFile = RequestBody.create(MediaType.parse("image/*"),
-                           persistImage(chunkedImages.get(i),"Image"+random));
-                    images.add(MultipartBody.Part.createFormData("FileUpload",
-                            persistImage(chunkedImages.get(i),"Image"+random).getName(),requestImageFile));
-                    //images.add(body);
-                }
-                listHashMaps.put("FileUpload",images);
-                JsonObject jsonObject = new JsonObject();
-                Log.i("TAG" ,"Uploaded strings"+listHashMaps);
-                getObservable(listHashMap,images).subscribeWith(getCoomplaint());
-            }
+        upload.setOnClickListener(v -> {
+            RequestBody requestBody;
+            JsonArray jsonArray = new JsonArray();
+            RequestBody booth,voter,candidate,father,age,sex,door,userid,alldata;
+            HashMap<String,RequestBody> mp = new  HashMap<>();
+            HashMap<String,RequestBody> maps = new  HashMap<>();
+            List< JsonObject> list = new ArrayList<>();
+           for (int i=0;i<mainArrayss.size();i++) {
+               booth=RequestBody.create(MediaType.parse("multipart/form-data"),"5c94ea6ad8edb13578370e11"  );
+               voter =RequestBody.create(MediaType.parse("multipart/form-data"),"id");
+               candidate =RequestBody.create(MediaType.parse("multipart/form-data"),"name");
+               father =RequestBody.create(MediaType.parse("multipart/form-data"),"father");
+               age =RequestBody.create(MediaType.parse("multipart/form-data"),"age");
+               sex =RequestBody.create(MediaType.parse("multipart/form-data"),"sex");
+               door =RequestBody.create(MediaType.parse("multipart/form-data"),"door");
+               userid =RequestBody.create(MediaType.parse("multipart/form-data"),sessions.getId());
+               alldata =RequestBody.create(MediaType.parse("multipart/form-data"),"data");
+               mp.put("Booth_Id", booth);
+               mp.put("VoterIdNumber",voter);
+               mp.put("CandidateName",candidate);
+               mp.put("FatherName",father);
+               mp.put("CandidateAge",age);
+               mp.put("CandidateSex",sex);
+               mp.put("DoorNumber",door);
+               mp.put("User_Id",userid);
+               mp.put("ALL_DATA",alldata);
+               //list.add(jsonObject);
+               jsonArray.add(jsonObject);
+           }
+            HashMap<String, JsonArray> listHashMap = new HashMap<>();
+            listHashMap.put("Info",jsonArray);
+           //  Log.i("TAG" ,"Uploaded strings"+ jsonArray.size()+ jsonArray);
+            MultipartBody.Part body = null;
+            HashMap<String, List<MultipartBody.Part>> listHashMaps = new HashMap<>();
+            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), "");
+            body =  MultipartBody.Part.createFormData("file", savebitmap("image",chunkedImages.get(0)).getName(),requestFile);
+            Log.i("TAG" ,"Uploaded strings"+savebitmap("image",chunkedImages.get(0)).length());
+//            getObservable(listHashMap,body).subscribeWith(getCoomplaint());
         });
         fab.setOnClickListener(view ->
         {
-//            String example =  getString(R.string.jsons);
-//            ArrayList<String> ids = new ArrayList<>();
-//            Pattern  p =Pattern.compile("[A-Z](.*?)[0-9]{5}");
-//            Matcher m = p.matcher(example);
-//            while (m.find()) {
-//                Log.i("Find", "Values " +  m.group()  );
-//                ids.add(m.group());
-//            }
+
             AlertDialog.Builder builder = new AlertDialog.Builder(ImagesUpload.this);
             builder. setMessage(R.string.dialog_select_prompt)
                     .setPositiveButton(R.string.dialog_select_gallery,
@@ -293,72 +256,37 @@ public class ImagesUpload extends AppCompatActivity {
         return skill;
 
     }
-    public Observable<ResponseBody> getObservable( HashMap<String, JsonArray>   listHashMap,
-                                                    List<MultipartBody.Part> files )
-    {
-        return NetworkClient.getRetrofit().create(MainInterface.class)
-                .CitizenRegister(listHashMap,files)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-    public DisposableObserver<ResponseBody> getCoomplaint()
-    {
-        return new DisposableObserver<ResponseBody>() {
-            @Override
-            public void onNext(ResponseBody responseBody) {
-
-                String bodyString = null;
-                try {
-                    bodyString = responseBody.string();
-                    String source;
-                    JSONObject jsonObject = new JSONObject(bodyString);
-                    Log.i("Tag","ComplaintsError"+ bodyString);
-                    if(jsonObject.getString("Status").contains("true") )
-                    {
-
-                    }
-                    else
-                    {
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            @Override
-            public void onError(Throwable ee) {
-
-                String bodyString = null;
-                if(ee instanceof HttpException) {
-                    if ( ((HttpException) ee).response().code() == 400)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-                }
-
-
-
-            }
-            @Override
-            public void onComplete() {
-
-            }
-        };
-    }
+//    public Observable<ResponseBody> getObservable( HashMap<String, JsonArray>   listHashMap,
+//                                                    MultipartBody.Part file)
+//    {
+////        return NetworkClient.getRetrofit().create(MainInterface.class)
+////                .citizenRegister(file)
+////                .subscribeOn(Schedulers.io())
+////                .observeOn(AndroidSchedulers.mainThread());
+//    }
+//    public DisposableObserver<ResponseBody> getCoomplaint()
+//    {
+//        return new DisposableObserver<ResponseBody>() {
+//            @Override
+//            public void onNext(ResponseBody responseBody) {
+//
+//
+//
+//            }
+//            @Override
+//            public void onError(Throwable ee) {
+//
+//
+//            }
+//            @Override
+//            public void onComplete() {
+//
+//            }
+//        };
+//    }
     public void startGalleryChooser() {
         if (PermissionUtils.requestPermission(this, GALLERY_PERMISSIONS_REQUEST,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
-//            Intent intent = new Intent();
-//            intent.setType("image/*");
-//            intent.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(Intent.createChooser(intent, "Select a photo"),
-//                    GALLERY_IMAGE_REQUEST);
             @SuppressLint("IntentReset") Intent i =
                     new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -366,14 +294,33 @@ public class ImagesUpload extends AppCompatActivity {
         }
     }
 
+    private File savebitmap(String filename,Bitmap bitmap) {
+        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+        OutputStream outStream = null;
 
+        File file = new File(filename + ".png");
+        if (file.exists()) {
+            file.delete();
+            file = new File(extStorageDirectory, filename + ".png");
+            Log.e("file exist", "" + file + ",Bitmap= " + filename);
+        }
+        try {
 
+            outStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.flush();
+            outStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e("file", "" + file);
+        return file;
 
+    }
 
     private File persistImage(Bitmap bitmap, String name) {
         File filesDir = getApplication().getFilesDir();
-        File imageFile = new File(filesDir, name + ".jpg");
-
+        File imageFile = new File(filesDir, name + ".png");
         OutputStream os;
         try {
             os = new FileOutputStream(imageFile);
@@ -422,7 +369,6 @@ public class ImagesUpload extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Uri uri = result.getUri();
                 uploadImage(uri);
-                // Toast.makeText(this, uri.toString()  + result.getSampleSize(), Toast.LENGTH_LONG).show();
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Toast.makeText(this, "Cropping failed: " + result.getError(), Toast.LENGTH_LONG).show();
             }
@@ -432,8 +378,7 @@ public class ImagesUpload extends AppCompatActivity {
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(
-                inContext.getContentResolver(), inImage, "Title", null);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
     }
     @Override
@@ -480,8 +425,8 @@ public class ImagesUpload extends AppCompatActivity {
         int rows,cols;
         int chunkHeight,chunkWidth;
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, image.getWidth(), image.getHeight(), true);
-        rows =  6;
-        cols = 1;
+        rows =  1;
+        cols = 3;
         chunkHeight = scaledBitmap.getHeight()/rows;
         chunkWidth = scaledBitmap.getWidth()/cols;
         Bitmap newBitmap;
@@ -491,24 +436,29 @@ public class ImagesUpload extends AppCompatActivity {
         for(int x=0; x<rows; x++){
             int xCoord = 0;
             for(int y=0; y<cols; y++){
-                newChunkImage.add(Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight));
-                newBitmap = Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight);
-                xCoord += chunkWidth;
+                if (y != 0) {
+                    if (y == 1) {
+                        int coor = 0;
+                        newChunkImage.add(Bitmap.createBitmap(scaledBitmap, coor , yCoord, (chunkWidth * 2) + 50, chunkHeight));
+                    } else {
+                        newChunkImage.add(Bitmap.createBitmap(scaledBitmap, xCoord , yCoord, chunkWidth, chunkHeight));
+                    }
+                }
+                xCoord = xCoord + chunkWidth;
             }
             yCoord += chunkHeight;
         }
         BitmapFactory.Options optionss = new BitmapFactory.Options();
         optionss.inScaled = false;
-        for (int i=0 ; i<newChunkImage.size(); i++)  {
-           callCloudVision(scaleBitmaps(newChunkImage.get(i) ,500,100), position);
-        }
+        callCloudVision(newChunkImage.get(1), position);
+
     }
 
 
     private void splitImage(Bitmap image, int chunkNumbers)
     {
 
-//        progressDialog.show();
+
         int rows,cols;
         int chunkHeight,chunkWidth;
         //To store all the small image chunks in bitmap format in this list
@@ -525,8 +475,7 @@ public class ImagesUpload extends AppCompatActivity {
             int xCoord = 0;
             for(int y=0; y<cols; y++){
                 chunkedImages.add(Bitmap.createBitmap(scaledBitmap, xCoord, yCoord, chunkWidth, chunkHeight));
-                mainArrayss.add(new com.voterid.imagepload.sesssion.MainArray("","",
-                        "","","","139",""));
+                mainArrayss.add(new UserPojo.Result());
                 xCoord += chunkWidth;
             }
             yCoord += chunkHeight;
@@ -534,12 +483,26 @@ public class ImagesUpload extends AppCompatActivity {
         BitmapFactory.Options optionss = new BitmapFactory.Options();
         optionss.inScaled = false;
 
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(imageRecycle);
         adapters = new Adapters();
         adapters.setList(chunkedImages,mainArrayss);
         adapters.setInterface(new Adapters.OnItemReadInterface() {
             @Override
             public void selectedImage(int position, Bitmap bitmap) {
                 splitImageSingle(bitmap,position);
+            }
+
+            @Override
+            public void uploadData(UserPojo.Result result, int position) {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("party_affiliation",result.getParty_affiliation());
+                jsonObject.addProperty("canvass_type",result.getCanvass_type());
+                jsonObject.addProperty("area_id",boothid);
+                jsonObject.addProperty("id",result.getEpic_number());
+                adapterPosoition = position;
+                userPresenter.update(jsonObject);
+
             }
         });
         adapters.notifyDataSetChanged();
@@ -607,16 +570,52 @@ public class ImagesUpload extends AppCompatActivity {
         }});
         Vision.Images.Annotate annotateRequest =
                 vision.images().annotate(batchAnnotateImagesRequest);
-        // Due to a bug: requests to Vision API containing large images fail when GZipped.
         annotateRequest.setDisableGZipContent(true);
         Log.d(TAG, "created Cloud Vision request object, sending request");
         return annotateRequest;
     }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    @Override
+    public void error(String message) {
+
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public void updated() {
+        adapters.removeItem(adapterPosoition);
+    }
+
+    @Override
+    public void showDetails(UserPojo.Result[] results, int position,String epicIdNew) {
+        UserPojo.Result result  = new UserPojo.Result();
+        result.setFm_name_tamil(results[0].getFm_name_tamil());
+        result.setFm_name_english(results[0].getFm_name_english());
+        result.setGendre(results[0].getGendre());
+        result.setAge(results[0].getAge());
+        result.setEpicId(epicIdNew);
+        result.setEpic_number(results[0].getEpic_number());
+        result.setRelation_type(results[0].getRelation_type());
+        result.setRelation_firstname_english(results[0].getRelation_firstname_english());
+        result.setRelation_lastname_english(results[0].getRelation_firstname_english());
+        adapters.setItem(result,position);
+
+    }
+
     private  class LableDetectionTask extends AsyncTask<Object, Void, String> {
         private final WeakReference<ImagesUpload> mActivityWeakReference;
         private Vision.Images.Annotate mRequest;
         int postion;
-        int readedItem= 0;
+
         LableDetectionTask(ImagesUpload activity, Vision.Images.Annotate annotate,int postion) {
             mActivityWeakReference = new WeakReference<>(activity);
             mRequest = annotate;
@@ -640,143 +639,20 @@ public class ImagesUpload extends AppCompatActivity {
         protected void onPostExecute(String result) {
             ImagesUpload activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
-                Log.i("TAG", "arraySize New " +result);
-
-                String voterid = "",name = "",fatherName = "",houseNo = "",age = "",gendre = "";
-                if (readedItem == 0) {
-                    voterid = result;
-                } else if (readedItem ==  1) {
-                    name = result;
-                } else if (readedItem == 2) {
-                    fatherName = result;
-                } else if (readedItem == 3) {
-                    houseNo = result;
-                } else if (readedItem == 4) {
-                    age = result;
-                }
-
-                if (readedItem == 5) {
-                    gendre = result;
-                    adapters.setItem(new com.voterid.imagepload.sesssion.MainArray(voterid,name,
-                            fatherName,age,gendre,houseNo,gendre),postion);
-                    readedItem = 0;
-                }
-                readedItem = readedItem + 1;
-
+                userPresenter.getUser("IBU0520122",postion,getNames(result));
+                Log.i("TAG","Readed Result "+ getNames(result));
             }
-
         }
     }
-   String getNames(String result)
-    {
-        String names="";
-        String results = result.replaceAll("[-+.^:,)(]","");
-        results.substring(results.indexOf("\n") + 1).trim();
-        String[] lines = results.split("\\n");
-    //    names = lines[1].replace("பெயர் ","");
-        Log.i("Find","arraySizess" + lines );
-//        String finalss =results.replaceAll("\\d","");
-//        Pattern pss = Pattern.compile("பெயர் \\w+");
-//        Matcher mss = pss.matcher(finalss);
-//        while (mss.find())
-//        {
-//            if (!mss.group().isEmpty())
-//            {
-//                allTexts.add(mss.group());
-//                Log.i("Find","arraySize" +mss.group());
-//            }
-//            else
-//            {
-//                allTexts.add("Cant find data..!");
-//            }
-//        }
 
-        return  names;
-    }
-
-    String getNamess(String result)
-    {
-        String names="";
-        String results = result.replaceAll("[-+.^:,)(]","");
-
-
-        String[] lines = results.split("\\n");
-        names = lines[2];
-        Log.i("Find","arraySize" + lines[2].trim());
-//        String finalss =results.replaceAll("\\d","");
-//        Pattern pss = Pattern.compile("பெயர் \\w+");
-//        Matcher mss = pss.matcher(finalss);
-//
-//        while (mss.find())
-//        {
-//            if (!mss.group().isEmpty())
-//            {
-//                allTexts.add(mss.group());
-//                Log.i("Find","arraySize" +mss.group());
-//            }
-//            else
-//            {
-//                allTexts.add("Cant find data..!");
-//            }
-//        }
-
-        return  names;
-    }
-    String getAge(String result) {
-        String names="";
-        String results = result.replaceAll("[-+.^:,)(]","");
-        String finalss =results.replaceAll("\\s","");
-        Pattern pss = Pattern.compile("வயது \\w+");
-        Matcher mss = pss.matcher(results);
-
-        while (mss.find())
-        {
-            if (!mss.group().isEmpty())
-            {
-                 names = mss.group();
-                Log.i("Find","arraySize" +mss.group());
-            }
-            else { names = ""; }
-        }
-        return  names;
-
-    }
-    String getSex(String result) {
-        String names="";
-        String results = result.replaceAll("[-+.^:,)(]","");
-        String finalss =results.replaceAll("\\s","");
-        Pattern pss = Pattern.compile("பாலினம் \\w+");
-        Matcher mss = pss.matcher(results);
-
-        while (mss.find())
-        {
-            if (!mss.group().isEmpty())
-            {
-                names = mss.group();
-                Log.i("Find","arraySize" +mss.group());
-            }
-            else
-            {
-                names ="";
-
-            }
-
-        }
-        return  names;
+   String getNames(String result) {
+        String[] lines = result.trim().split("\n");
+        return  lines != null && lines.length > 1 ? lines[0] : result;
     }
 
 
-    String getIds(String result) {
-        Pattern  ps=Pattern.compile("[A-Z](.*?)[0-9]{7}");
-        Pattern  p=Pattern.compile("[A-Z](.*?)[0-9]{6}");
-         String results = "";
-        String[] lines = result.split("\\n");
-        results = lines[0].trim();
 
-        return  results;
-    }
     private void callCloudVision(final Bitmap bitmap,int position) {
-
         mImageDetails.setText(R.string.loading_message);
         // Do the real work in an async task, because we need to use the network anyway
         try {
@@ -813,15 +689,6 @@ public class ImagesUpload extends AppCompatActivity {
         Locale loc = new Locale("ta");
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         if (labels != null) {
-//            for (EntityAnnotation label : labels) {
-//               message.append(String.format(loc ,
-//                       "%.3f: %s", label.getScore(), label.getDescription()));
-//                strings =  label.getDescription();
-//                message.append("\n");
-//
-//                message.append(label/.get)
-//
-//          }
             for (int i=0;i<labels.size();i++)
             {
                 strings = labels.get(0).getDescription();
